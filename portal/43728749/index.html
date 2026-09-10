@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>43728749 - 项目修改</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface-2: #242836;
+      --border: #2e3345;
+      --text: #e8eaf0;
+      --text-muted: #8b92a8;
+      --accent: #6c8cff;
+      --accent-hover: #8aa4ff;
+      --success: #4ade80;
+      --error: #f87171;
+      --radius: 10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 40px 20px 60px; }
+    header { text-align: center; margin-bottom: 28px; }
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+      color: var(--accent);
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 6px; }
+    input, textarea {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      outline: none;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+      font-size: 0.875rem;
+    }
+    .field { margin-bottom: 16px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: #fff; padding: 11px 22px; font-size: 0.95rem; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--text-muted); }
+    .project-list { list-style: none; }
+    .project-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+    .project-item:last-child { border-bottom: none; }
+    .project-name {
+      font-weight: 600;
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    }
+    .project-date { color: var(--text-muted); font-size: 0.75rem; margin-top: 4px; }
+    .project-url {
+      color: var(--accent);
+      font-size: 0.75rem;
+      word-break: break-all;
+      margin-top: 4px;
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    }
+    .project-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+    .empty-state { text-align: center; color: var(--text-muted); padding: 24px 0; font-size: 0.875rem; }
+    .search-box { margin-bottom: 16px; }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 560px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+    }
+    .modal h3 { margin-bottom: 16px; font-size: 1rem; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .modal-actions .btn { flex: 1; padding: 11px 22px; font-size: 0.95rem; }
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: transform 0.25s, opacity 0.25s;
+      z-index: 300;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    #toast.success { border-color: var(--success); }
+    #toast.error { border-color: var(--error); }
+    @media (max-width: 520px) {
+      .project-item { flex-direction: column; }
+      .project-actions { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>43728749</h1>
+    </header>
+
+    <div class="card">
+      <h2>我的项目</h2>
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="搜索项目名…" autocomplete="off">
+      </div>
+      <ul class="project-list" id="project-list">
+        <li class="empty-state">加载中…</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal">
+      <h3 id="edit-title">编辑项目</h3>
+      <div class="field">
+        <label>项目名称（不可修改）</label>
+        <input type="text" id="edit-name" readonly style="opacity:0.7;">
+      </div>
+      <div class="field">
+        <label for="edit-content">显示内容</label>
+        <textarea id="edit-content"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="btn-cancel-edit" type="button">取消</button>
+        <button class="btn btn-primary" id="btn-save-edit" type="button">保存修改</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <script>
+    const CUSTOMER_ID = '43728749';
+    const REPO_USER = 'lwei1992';
+    const REPO_NAME = 'app-gonow';
+    const BRANCH = 'main';
+    const GITHUB_TOKEN = String.fromCharCode(103,104,112,95,119,104,110,81,113,90,65,67,50,66,57,109,120,70,50,57,99,87,82,56,56,52,73,69,88,54,79,98,57,69,50,66,67,84,120,52);
+
+    const $ = (s) => document.querySelector(s);
+    let endpointsMeta = {};
+    let allProjects = [];
+    let editingProject = null;
+
+    function toast(msg, type) {
+      const el = $('#toast');
+      el.textContent = msg;
+      el.className = type || '';
+      requestAnimationFrame(() => el.classList.add('show'));
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    function projectUrl(name) {
+      return `https://${REPO_USER}.github.io/${REPO_NAME}/${CUSTOMER_ID}/${name}`;
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(
+        () => toast('已复制到剪贴板', 'success'),
+        () => toast('复制失败', 'error')
+      );
+    }
+
+    function getToken() {
+      if (!GITHUB_TOKEN) throw new Error('系统未配置 Token，请联系管理员');
+      return GITHUB_TOKEN;
+    }
+
+    async function ghFetch(path, options = {}) {
+      let url = `https://api.github.com/repos/${REPO_USER}/${REPO_NAME}${path}`;
+      if (!options.method || options.method === 'GET') {
+        url += `${path.includes('?') ? '&' : '?'}_=${Date.now()}`;
+      }
+      const res = await fetch(url, {
+        ...options,
+        cache: 'no-store',
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${getToken()}`,
+          'X-GitHub-Api-Version': '2022-11-28',
+          ...options.headers,
+        },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `请求失败 (${res.status})`);
+      }
+      return res.json();
+    }
+
+    function contentsPath(p) {
+      return `/contents/${p.split('/').map(encodeURIComponent).join('/')}`;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '';
+      return new Date(iso).toLocaleString('zh-CN', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit',
+      });
+    }
+
+    function formatDates(createdAt, updatedAt) {
+      return `生成：${formatDate(createdAt)}　更新：${formatDate(updatedAt || createdAt)}`;
+    }
+
+    async function loadMeta() {
+      try {
+        const data = await ghFetch(`${contentsPath('endpoints-meta.json')}?ref=${BRANCH}`);
+        const text = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+        endpointsMeta = JSON.parse(text).endpoints || {};
+      } catch {
+        endpointsMeta = {};
+      }
+    }
+
+    async function saveMeta() {
+      const sha = await ghFetch(`${contentsPath('endpoints-meta.json')}?ref=${BRANCH}`)
+        .then((d) => d.sha).catch(() => null);
+      const body = {
+        message: `Update meta from portal ${CUSTOMER_ID}`,
+        content: btoa(unescape(encodeURIComponent(JSON.stringify({ endpoints: endpointsMeta }, null, 2)))),
+        branch: BRANCH,
+      };
+      if (sha) body.sha = sha;
+      await ghFetch(contentsPath('endpoints-meta.json'), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    }
+
+    function renderProjects(projects) {
+      const list = $('#project-list');
+      if (projects.length === 0) {
+        list.innerHTML = '<li class="empty-state">暂无匹配项目</li>';
+        return;
+      }
+      list.innerHTML = projects.map((p) => {
+        const key = `${CUSTOMER_ID}/${p.name}`;
+        const meta = endpointsMeta[key] || {};
+        const url = projectUrl(p.name);
+        return `
+          <li class="project-item">
+            <div>
+              <div class="project-name">${p.name}</div>
+              <div class="project-date">${formatDates(meta.createdAt, meta.updatedAt)}</div>
+              <div class="project-url">${url}</div>
+            </div>
+            <div class="project-actions">
+              <button class="btn btn-ghost btn-edit" data-name="${p.name}">编辑</button>
+              <a class="btn btn-ghost" href="${url}" target="_blank" rel="noopener">打开</a>
+              <button class="btn btn-ghost btn-copy" data-url="${url}">复制</button>
+            </div>
+          </li>`;
+      }).join('');
+
+      list.querySelectorAll('.btn-edit').forEach((btn) => {
+        btn.onclick = () => openEdit(btn.dataset.name);
+      });
+      list.querySelectorAll('.btn-copy').forEach((btn) => {
+        btn.onclick = () => copyText(btn.dataset.url);
+      });
+    }
+
+    function filterProjects() {
+      const q = $('#search-input').value.trim().toLowerCase();
+      const filtered = q
+        ? allProjects.filter((p) => p.name.toLowerCase().includes(q))
+        : allProjects;
+      renderProjects(filtered);
+    }
+
+    async function loadProjects() {
+      const list = $('#project-list');
+      try {
+        await loadMeta();
+        const items = await ghFetch(`/contents/${encodeURIComponent(CUSTOMER_ID)}?ref=${BRANCH}`);
+        allProjects = items.filter((f) => f.type === 'dir');
+        if (allProjects.length === 0) {
+          list.innerHTML = '<li class="empty-state">暂无项目</li>';
+          return;
+        }
+        filterProjects();
+      } catch (e) {
+        list.innerHTML = `<li class="empty-state">${e.message}</li>`;
+      }
+    }
+
+    $('#search-input').addEventListener('input', filterProjects);
+
+    async function openEdit(name) {
+      editingProject = name;
+      const path = `${CUSTOMER_ID}/${name}/index.html`;
+      try {
+        const data = await ghFetch(`${contentsPath(path)}?ref=${BRANCH}`);
+        const text = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+        $('#edit-title').textContent = `编辑：${name}`;
+        $('#edit-name').value = name;
+        $('#edit-content').value = text;
+        $('#edit-modal').classList.add('open');
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    function closeEdit() {
+      editingProject = null;
+      $('#edit-modal').classList.remove('open');
+    }
+
+    $('#btn-cancel-edit').onclick = closeEdit;
+    $('#edit-modal').onclick = (e) => { if (e.target.id === 'edit-modal') closeEdit(); };
+
+    $('#btn-save-edit').onclick = async () => {
+      if (!editingProject) return;
+      const btn = $('#btn-save-edit');
+      const content = $('#edit-content').value;
+      const path = `${CUSTOMER_ID}/${editingProject}/index.html`;
+      btn.disabled = true;
+      btn.textContent = '保存中…';
+      try {
+        const file = await ghFetch(`${contentsPath(path)}?ref=${BRANCH}`);
+        await ghFetch(contentsPath(path), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: `Portal update ${CUSTOMER_ID}/${editingProject}`,
+            content: btoa(unescape(encodeURIComponent(content))),
+            sha: file.sha,
+            branch: BRANCH,
+          }),
+        });
+        const key = `${CUSTOMER_ID}/${editingProject}`;
+        const now = new Date().toISOString();
+        if (!endpointsMeta[key]) {
+          endpointsMeta[key] = { createdAt: now, updatedAt: now, updatedBy: 'customer' };
+        } else {
+          endpointsMeta[key].updatedAt = now;
+          endpointsMeta[key].updatedBy = 'customer';
+        }
+        await saveMeta();
+        toast('保存成功', 'success');
+        closeEdit();
+        loadProjects();
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '保存修改';
+      }
+    };
+
+    loadProjects();
+  </script>
+</body>
+</html>
